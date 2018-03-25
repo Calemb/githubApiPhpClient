@@ -9,6 +9,10 @@ function SanitizeInput($input)
     return $sanitizedInput;
 }
 
+$app->get('/', function ($request, $response, $args) {
+    return $this->renderer->render($response, 'index.phtml', $args);
+});
+
 //route to proper app path
 $app->get('/api/{user1}/{repo1}/{user2}/{repo2}', function ($request, $response, $args) {
 

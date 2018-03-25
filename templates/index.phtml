@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8"/>
-        <title>Slim 3</title>
+        <title>GitHub API Client</title>
         <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
         <style>
             body {
@@ -23,16 +23,107 @@
                 font-weight: 200;
                 margin-bottom: 0;
             }
+            div {
+                margin: 20px 0px;
+            }
+            form span {
+                color: #f00;
+                display: block;
+            }
+            #message span {
+                display: block;
+            }
+            form input {
+                padding: 5px 5px;
+                border: 1px solid #ccc;
+                width: 25%;
+            }
         </style>
     </head>
     <body>
-        <h1>Slim</h1>
-        <div>a microframework for PHP</div>
-
-        <?php if (isset($name)) : ?>
-            <h2>Hello <?= htmlspecialchars($name); ?>!</h2>
+        <h1>GitHub API Client</h1>
+        <div> delivered with Slim php framework</div>
+<p>
+Fill form below with repository URLS
+</p>
+<form id="apiForm">
+    <div>
+        Repository 1 URL: <input type="text" value="https://github.com/vuejs/vue-rx">
+        <span id="repo1Msg"></span>
+    </div>
+    <div>
+        Repository 2 URL: <input type="text" value="https://github.com/heroku/php-getting-started">
+        <span id="repo2Msg"></span>
+    </div>
+    <input type="submit" value="Send">
+</form>
+<div id="results"></div>
+<!--
+        <?php if (isset($name)): ?>
+            <h2>Hello <?=htmlspecialchars($name);?>!</h2>
         <?php else: ?>
             <p>Try <a href="http://www.slimframework.com">SlimFramework</a></p>
-        <?php endif; ?>
+        <?php endif;?>
+        -->
     </body>
+
+    <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+  <script>
+    function parseFormInputToRepoData(url)
+    {
+        var urlParams =  url.split("/");
+        var user = '';
+        var name = '';
+
+        if(urlParams.length > 1)
+        {//take two last elems (in case someone paste only 'user/name')
+            user = urlParams[urlParams.length-2].trim();
+            name = urlParams[urlParams.length-1].trim();
+        }
+
+        return {user: user, name:name};
+    }
+
+
+    $(document).ready(function()
+    {
+        $("#apiForm").submit(function(){
+            const input1 = $('#apiForm > div:nth-child(1) > input[type="text"]').val();
+            const input2 = $('#apiForm > div:nth-child(2) > input[type="text"]').val();
+
+            const repo1 = parseFormInputToRepoData(input1);
+            const repo2 = parseFormInputToRepoData(input2);
+
+            if(repo1.user != '' && repo1.name != '' && repo2.user!='' && repo2.name != '')
+            {
+                $("#results").html("Processing.....");
+                $.get('api/'+repo1.user+"/"+repo1.name+"/"+repo2.user+"/"+repo2.name,  (response, status) => {
+                    if(response[0].message != '')
+                    {
+                        $("#repo1Msg").html(response[0].message);
+                    }
+                    if(response[1].message != '')
+                    {
+                        $("#repo2Msg").html(response[1].message);
+                    }
+
+                    $("#formatResults div:nth-child(1)").html(response[1]);
+                    $("#formatResults div:nth-child(2)").html(response[0]);
+
+                    $("#results").html(JSON.stringify(response));//plain txt
+                });
+            }
+            else
+            {
+                $("#results").html("Please provide repository full URL or at least 'user/repoName'");
+            }
+
+            return false;
+        })
+    })
+  </script>
 </html>
