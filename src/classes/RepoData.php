@@ -152,7 +152,7 @@ class RepoData
 
     /**
      * Make github API request and collect data about repository
-     * 
+     *
      * @return array repo data array filled with parameters or empty with message
      */
     public function GetRepoData()
@@ -169,7 +169,7 @@ class RepoData
             //return empty data array if curl request fail
             $msg = 'Unknown issue...';
             if (isset($repoData['message'])) {
-                $msg = $repoData['message'];//set message from github API - like too many requests, not found repo etc.
+                $msg = $repoData['message']; //set message from github API - like too many requests, not found repo etc.
             }
 
             $data = $this->MakeEmptyRepoDataArray($msg);
@@ -281,13 +281,14 @@ class RepoData
         $cInitPullReqPage = $this->MakeCurlRequest($pullUrl, [], [CURLOPT_HEADERFUNCTION => array($this, 'parseHeader')]);
 
         if ($this->curlLastRequestPageNum == -1) { //only one page with results - count it!
-            $pullReqNum = count($cInitPullReqPage);
+            $pullReqNum = count($cInitPullReqPage) - 1;//curl results contains additional http_response elem in array
+            // var_dump($cInitPullReqPage);
         } else {
             $pullReqNum = ($this->curlLastRequestPageNum - 1) * $this->perPageRes; //total pull requests without last page
 
             $lastPageClosePullData = $this->MakeCurlRequest($pullUrl . "&page=" . $this->curlLastRequestPageNum, [], []); //get last page of pull requests
 
-            $pullReqNum += count($lastPageClosePullData); //add pull requests amount from last page
+            $pullReqNum += count($lastPageClosePullData) - 1; //add pull requests amount from last page
         }
 
         return $pullReqNum;
